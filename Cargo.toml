@@ -1,0 +1,22 @@
+[package]
+name = "pixel_grid"
+description = "Library for drawing with a grid of rectangles"
+version = "0.1.0"
+authors = ["Stephen Sherratt <stephen@sherra.tt>"]
+license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/stevebob/pixel-grid.git"
+repository = "https://github.com/stevebob/pixel-grid.git"
+documentation = "https://docs.rs/pixel_grid"
+
+
+[dependencies]
+gfx = "0.17"
+gfx_device_gl = "0.15"
+gfx_window_glutin = "0.26"
+glutin = "0.18"
+coord_2d = "0.2"
+grid_2d = "0.11"
+
+[[example]]
+name = "gradient"
