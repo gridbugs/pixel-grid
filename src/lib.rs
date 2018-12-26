@@ -66,11 +66,11 @@ pub struct Pixel<'a> {
 }
 
 impl<'a> Pixel<'a> {
-    pub fn set_colour_rgb(&mut self, r: f32, g: f32, b: f32) {
-        self.cell.colour = [r, g, b];
-    }
-    pub fn set_colour_array(&mut self, colour: [f32; 3]) {
+    pub fn set_colour_array_f32(&mut self, colour: [f32; 3]) {
         self.cell.colour = colour;
+    }
+    pub fn set_colour_array_u8(&mut self, [r, g, b]: [u8; 3]) {
+        self.set_colour_array_f32([r as f32 / 255., g as f32 / 255., b as f32 / 255.]);
     }
 }
 
@@ -243,8 +243,7 @@ impl Window {
         self.closed
     }
     pub fn pixel_grid(&mut self) -> PixelGrid {
-        let writer = self
-            .factory
+        let writer = self.factory
             .write_mapping(&self.cell_upload)
             .expect("Failed to map instance upload buffer");
         PixelGrid {
