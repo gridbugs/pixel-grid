@@ -9,7 +9,7 @@ fn main() {
         cell_size: Size::new(8, 16),
     });
     loop {
-        if pg.is_window_closed() {
+        if pg.is_closed() {
             break;
         }
         pg.with_pixel_grid(|mut pixel_grid| {
