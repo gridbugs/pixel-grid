@@ -10,7 +10,6 @@ pub use coord_2d::{Coord, Size};
 use gfx::traits::FactoryExt;
 use gfx::Device;
 use gfx::Factory;
-use glutin::GlContext;
 use grid_2d::coord_system::{CoordSystem, XThenY, XThenYIter};
 use std::iter;
 use std::slice;
@@ -112,7 +111,8 @@ impl Window {
             .with_min_dimensions(glutin_size);
         let context = glutin::ContextBuilder::new().with_vsync(true);
         let (window, device, mut factory, rtv, _dsv) =
-            gfx_window_glutin::init::<ColourFormat, DepthFormat>(builder, context, &events_loop);
+            gfx_window_glutin::init::<ColourFormat, DepthFormat>(builder, context, &events_loop)
+                .expect("Failed to create window");
         let (width, height): (u32, u32) = window.get_outer_size().unwrap().into();
         let mut encoder: gfx::Encoder<
             gfx_device_gl::Resources,
