@@ -43,12 +43,6 @@ gfx_pipeline!(pipe {
         ("Target", gfx::state::ColorMask::all(), gfx::preset::blend::ALPHA),
 });
 
-#[derive(Clone, Debug)]
-pub enum WindowSize {
-    Fullscreen,
-    Dimensions(f64, f64),
-}
-
 pub struct Window {
     encoder: gfx::Encoder<gfx_device_gl::Resources, gfx_device_gl::CommandBuffer>,
     device: gfx_device_gl::Device,
@@ -82,6 +76,16 @@ pub struct WindowSpec {
     pub title: String,
     pub grid_size: Size,
     pub cell_size: Size,
+}
+
+impl WindowSpec {
+    pub fn new(title: String, grid_size: Size, cell_size: Size) -> Self {
+        Self {
+            title,
+            grid_size,
+            cell_size,
+        }
+    }
 }
 
 impl Window {
@@ -232,11 +236,12 @@ impl Window {
         self.window.swap_buffers().unwrap();
         self.device.cleanup();
     }
-    pub fn is_window_closed(&self) -> bool {
+    pub fn is_closed(&self) -> bool {
         self.closed
     }
     pub fn pixel_grid(&mut self) -> PixelGrid {
-        let writer = self.factory
+        let writer = self
+            .factory
             .write_mapping(&self.cell_upload)
             .expect("Failed to map instance upload buffer");
         PixelGrid {
