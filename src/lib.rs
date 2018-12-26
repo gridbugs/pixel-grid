@@ -288,7 +288,7 @@ impl<'a> PixelGrid<'a> {
         }
     }
     pub fn coord_iter(&self) -> CoordIter {
-        XThenYIter::from(self.size())
+        self.coord_system.coord_iter()
     }
     pub fn enumerate_mut(&mut self) -> EnumerateMut {
         self.coord_iter().zip(self.iter_mut())
