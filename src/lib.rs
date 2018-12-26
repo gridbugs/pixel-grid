@@ -70,6 +70,9 @@ impl<'a> Pixel<'a> {
     pub fn set_colour_rgb(&mut self, r: f32, g: f32, b: f32) {
         self.cell.colour = [r, g, b];
     }
+    pub fn set_colour_array(&mut self, colour: [f32; 3]) {
+        self.cell.colour = colour;
+    }
 }
 
 pub struct WindowSpec {
