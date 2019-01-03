@@ -114,10 +114,8 @@ impl Window {
             gfx_window_glutin::init::<ColourFormat, DepthFormat>(builder, context, &events_loop)
                 .expect("Failed to create window");
         let (width, height): (u32, u32) = window.get_outer_size().unwrap().into();
-        let mut encoder: gfx::Encoder<
-            gfx_device_gl::Resources,
-            gfx_device_gl::CommandBuffer,
-        > = factory.create_command_buffer().into();
+        let mut encoder: gfx::Encoder<gfx_device_gl::Resources, gfx_device_gl::CommandBuffer> =
+            factory.create_command_buffer().into();
         let pso = factory
             .create_pipeline_simple(
                 r#"
