@@ -11,9 +11,9 @@ documentation = "https://docs.rs/pixel_grid"
 
 
 [dependencies]
-gfx = "0.17"
-gfx_device_gl = "0.15"
-gfx_window_glutin = "0.28"
+gfx = "0.18"
+gfx_device_gl = "0.16"
+gfx_window_glutin = "0.29"
 glutin = "0.19"
 coord_2d = "0.2"
 grid_2d = "0.12"
