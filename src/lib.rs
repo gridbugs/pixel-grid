@@ -20,27 +20,35 @@ type DepthFormat = gfx::format::DepthStencil;
 const QUAD_INDICES: [u16; 6] = [0, 1, 2, 2, 3, 0];
 const QUAD_COORDS: [[f32; 2]; 4] = [[0.0, 0.0], [0.0, 1.0], [1.0, 1.0], [1.0, 0.0]];
 
-gfx_vertex_struct!(QuadCorners {
-    corner_zero_to_one: [f32; 2] = "a_CornerZeroToOne",
-});
+type Colour = [f32; 4];
 
-gfx_vertex_struct!(Cell {
-    coord: [f32; 2] = "a_Coord",
-    colour: [f32; 3] = "a_Colour",
-});
+mod graphics {
+    use super::*;
 
-gfx_constant_struct!(Properties {
-    window_size_in_pixels: [f32; 2] = "u_WindowSizeInPixels",
-    cell_size_in_pixels: [f32; 2] = "u_CellSizeInPixels",
-});
+    gfx_vertex_struct!(QuadCorners {
+        corner_zero_to_one: [f32; 2] = "a_CornerZeroToOne",
+    });
 
-gfx_pipeline!(pipe {
-    quad_corners: gfx::VertexBuffer<QuadCorners> = (),
-    cells: gfx::InstanceBuffer<Cell> = (),
-    properties: gfx::ConstantBuffer<Properties> = "Properties",
-    out_colour: gfx::BlendTarget<ColourFormat> =
-        ("Target", gfx::state::ColorMask::all(), gfx::preset::blend::ALPHA),
-});
+    gfx_vertex_struct!(Cell {
+        coord: [f32; 2] = "a_Coord",
+        colour: Colour = "a_Colour",
+    });
+
+    gfx_constant_struct!(Properties {
+        window_size_in_pixels: [f32; 2] = "u_WindowSizeInPixels",
+        cell_size_in_pixels: [f32; 2] = "u_CellSizeInPixels",
+    });
+
+    gfx_pipeline!(pipe {
+        quad_corners: gfx::VertexBuffer<QuadCorners> = (),
+        cells: gfx::InstanceBuffer<Cell> = (),
+        properties: gfx::ConstantBuffer<Properties> = "Properties",
+        out_colour: gfx::BlendTarget<ColourFormat> =
+            ("Target", gfx::state::ColorMask::all(), gfx::preset::blend::ALPHA),
+    });
+}
+
+use graphics::*;
 
 pub struct Window {
     encoder: gfx::Encoder<gfx_device_gl::Resources, gfx_device_gl::CommandBuffer>,
@@ -66,11 +74,22 @@ pub struct Pixel<'a> {
 }
 
 impl<'a> Pixel<'a> {
-    pub fn set_colour_array_f32(&mut self, colour: [f32; 3]) {
+    pub fn set_colour_array_rgba_f32(&mut self, colour: Colour) {
         self.cell.colour = colour;
     }
-    pub fn set_colour_array_u8(&mut self, [r, g, b]: [u8; 3]) {
-        self.set_colour_array_f32([r as f32 / 255., g as f32 / 255., b as f32 / 255.]);
+    pub fn set_colour_array_rgba_u8(&mut self, [r, g, b, a]: [u8; 4]) {
+        self.set_colour_array_rgba_f32([
+            r as f32 / 255.,
+            g as f32 / 255.,
+            b as f32 / 255.,
+            a as f32 / 255.,
+        ]);
+    }
+    pub fn set_colour_array_rgb_f32(&mut self, [r, g, b]: [f32; 3]) {
+        self.set_colour_array_rgba_f32([r, g, b, 1.]);
+    }
+    pub fn set_colour_array_rgb_u8(&mut self, [r, g, b]: [u8; 3]) {
+        self.set_colour_array_rgba_u8([r, g, b, 255]);
     }
 }
 
@@ -126,8 +145,8 @@ impl Window {
                 };
                 in vec2 a_CornerZeroToOne;
                 in vec2 a_Coord;
-                in vec3 a_Colour;
-                flat out vec3 v_Colour;
+                in vec4 a_Colour;
+                flat out vec4 v_Colour;
                 void main() {
                     v_Colour = a_Colour;
                     vec2 top_left_corner_in_pixels = (a_Coord + a_CornerZeroToOne) * u_CellSizeInPixels;
@@ -139,9 +158,9 @@ impl Window {
                 r#"
                 #version 150 core
                 out vec4 Target;
-                flat in vec3 v_Colour;
+                flat in vec4 v_Colour;
                 void main() {
-                    Target = vec4(v_Colour, 1);
+                    Target = v_Colour;
                 }
                 "#.as_bytes(),
                 pipe::new(),
@@ -175,7 +194,7 @@ impl Window {
                 .iter_mut(),
         ) {
             cell.coord = [coord.x as f32, coord.y as f32];
-            cell.colour = [0., 0., 1.];
+            cell.colour = [0., 0., 0., 0.];
         }
         let properties_buffer: gfx::handle::Buffer<gfx_device_gl::Resources, Properties> =
             factory.create_constant_buffer(1);
@@ -222,7 +241,7 @@ impl Window {
             return;
         }
         self.encoder
-            .clear(&self.bundle.data.out_colour, [0., 1., 0., 0.]);
+            .clear(&self.bundle.data.out_colour, [0., 0., 0., 0.]);
         self.encoder
             .copy_buffer(
                 &self.cell_upload,
@@ -241,7 +260,8 @@ impl Window {
         self.closed
     }
     pub fn pixel_grid(&mut self) -> PixelGrid {
-        let writer = self.factory
+        let writer = self
+            .factory
             .write_mapping(&self.cell_upload)
             .expect("Failed to map instance upload buffer");
         PixelGrid {

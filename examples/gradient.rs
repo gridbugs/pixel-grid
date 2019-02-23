@@ -18,7 +18,7 @@ fn main() {
             pixel_grid.enumerate_mut().for_each(|(coord, mut pixel)| {
                 let x = coord.x as f32 / width;
                 let y = coord.y as f32 / height;
-                pixel.set_colour_array_f32([x, y, 1.]);
+                pixel.set_colour_array_f32([x, y, 1., 1.]);
             });
         });
         pg.draw();
